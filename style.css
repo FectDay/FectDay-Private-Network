@@ -1,0 +1,19 @@
+body{
+    background:#0e0e0e;
+    color:white;
+    font-family:sans-serif;
+    padding:20px;
+}
+input,textarea,button{
+    width:100%;
+    margin:10px 0;
+    padding:12px;
+    border-radius:10px;
+    border:none;
+    font-size:16px;
+}
+button{
+    background:#2ea6ff;
+    color:white;
+    font-weight:600;
+}
