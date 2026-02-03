@@ -4,55 +4,183 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<title>FectVPN</title>
+
 <style>
+*{box-sizing:border-box;margin:0;padding:0}
+
 body{
-    background:#0e0e0e;
+    height:100vh;
+    font-family:system-ui,-apple-system;
     color:white;
-    font-family:sans-serif;
+    overflow:hidden;
+    background:radial-gradient(circle at 30% 30%, #0a0f1f, #05070d 70%);
+}
+
+/* частицы */
+canvas{
+    position:fixed;
+    top:0;left:0;
+    width:100%;height:100%;
+    z-index:0;
+}
+
+/* центрирование */
+.wrapper{
+    position:relative;
+    z-index:2;
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     padding:20px;
 }
-input,textarea,button{
+
+/* liquid glass карточка */
+.card{
+    width:100%;
+    max-width:420px;
+    padding:28px;
+    border-radius:28px;
+    background:rgba(255,255,255,0.06);
+    backdrop-filter:blur(25px);
+    -webkit-backdrop-filter:blur(25px);
+    box-shadow:0 0 60px rgba(46,166,255,.25);
+    border:1px solid rgba(255,255,255,0.08);
+    animation:fade .6s ease;
+}
+
+@keyframes fade{
+    from{opacity:0;transform:translateY(20px)}
+}
+
+h2{
+    text-align:center;
+    margin-bottom:22px;
+    font-weight:600;
+    letter-spacing:.5px;
+}
+
+input, textarea{
     width:100%;
     margin:10px 0;
-    padding:12px;
-    border-radius:10px;
-    border:none;
-}
-button{
-    background:#2ea6ff;
+    padding:14px 16px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,0.1);
+    background:rgba(255,255,255,0.05);
     color:white;
-    font-weight:600;
+    font-size:15px;
+    outline:none;
+    transition:.25s;
+}
+
+input:focus, textarea:focus{
+    border-color:#2ea6ff;
+    box-shadow:0 0 15px #2ea6ff55;
+}
+
+button{
+    width:100%;
+    margin-top:14px;
+    padding:15px;
+    border-radius:18px;
+    border:none;
+    font-size:16px;
+    font-weight:700;
+    color:white;
+    cursor:pointer;
+    background:linear-gradient(90deg,#2ea6ff,#0057ff);
+    box-shadow:0 0 25px #2ea6ff66;
+    transition:.25s;
+}
+
+button:active{
+    transform:scale(.97);
+}
+
+.footer{
+    margin-top:12px;
+    font-size:12px;
+    opacity:.6;
+    text-align:center;
 }
 </style>
 </head>
 <body>
 
-<h2>FectVPN Beta Access</h2>
+<canvas id="particles"></canvas>
 
-<input id="name" placeholder="Name">
-<input id="country" placeholder="Country">
-<input id="device" placeholder="Device">
-<textarea id="purpose" placeholder="Why VPN?"></textarea>
+<div class="wrapper">
+    <div class="card">
+        <h2>FectVPN Beta Access</h2>
 
-<button id="send">Send request</button>
+        <input id="name" placeholder="Your name">
+        <input id="country" placeholder="Country of residence">
+        <input id="device" placeholder="Your device">
+        <textarea id="purpose" rows="3" placeholder="What will you use a VPN for?"></textarea>
+
+        <button id="send">Send request</button>
+
+        <div class="footer">Secure beta access form inside Telegram</div>
+    </div>
+</div>
 
 <script>
-const tg = Telegram.WebApp;
-tg.expand();
+/* Telegram */
+const tg = window.Telegram?.WebApp;
+tg?.ready();
+tg?.expand();
 
-document.getElementById("send").onclick = () => {
-    const data = {
-        name: document.getElementById("name").value,
-        country: document.getElementById("country").value,
-        device: document.getElementById("device").value,
-        purpose: document.getElementById("purpose").value,
-        lang: tg.initDataUnsafe.user.language_code || "en"
+/* particles */
+const canvas = document.getElementById("particles");
+const ctx = canvas.getContext("2d");
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+
+let particles = [];
+for(let i=0;i<60;i++){
+    particles.push({
+        x:Math.random()*canvas.width,
+        y:Math.random()*canvas.height,
+        r:Math.random()*2+1,
+        dx:(Math.random()-0.5)*0.3,
+        dy:(Math.random()-0.5)*0.3
+    });
+}
+
+function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle="rgba(46,166,255,0.6)";
+    particles.forEach(p=>{
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fill();
+        p.x+=p.dx; p.y+=p.dy;
+        if(p.x<0||p.x>canvas.width) p.dx*=-1;
+        if(p.y<0||p.y>canvas.height) p.dy*=-1;
+    });
+    requestAnimationFrame(draw);
+}
+draw();
+
+/* send */
+document.getElementById("send").onclick = ()=>{
+    if(!tg || typeof tg.sendData!=="function"){
+        alert("Open from Telegram bot");
+        return;
+    }
+
+    const payload = {
+        name: name.value,
+        country: country.value,
+        device: device.value,
+        purpose: purpose.value,
+        lang: tg.initDataUnsafe?.user?.language_code || "en"
     };
 
-    tg.sendData(JSON.stringify(data));
+    tg.sendData(JSON.stringify(payload));
 };
-
-alert("WebApp loaded: " + (typeof Telegram !== "undefined"));
 </script>
 
 </body>
