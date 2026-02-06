@@ -1,3 +1,3 @@
 TOKEN = ""
 ADMIN_IDS = []
-MAX_BETA = 6
+MAX_BETA = 5
